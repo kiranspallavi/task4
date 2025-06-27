@@ -1,0 +1,133 @@
+USE OnlineBookstore;
+
+-- 1. Count total number of users
+SELECT COUNT(*) AS total_users FROM Users;
+/*
++--------------+
+| total_users  |
++--------------+
+|      4       |
++--------------+
+*/
+
+-- 2. Count number of books by each author
+SELECT A.name AS author_name, COUNT(B.book_id) AS book_count
+FROM Authors A
+LEFT JOIN Books B ON A.author_id = B.author_id
+GROUP BY A.name;
+/*
++---------------+-------------+
+| author_name   | book_count |
++---------------+-------------+
+| George Orwell |     3      |
+| J.K. Rowling  |     1      |
+| Anonymous     |     1      |
++---------------+-------------+
+*/
+
+-- 3. Calculate average book price
+SELECT ROUND(AVG(price), 2) AS avg_price FROM Books;
+/*
++------------+
+| avg_price  |
++------------+
+|   289.30   |
++------------+
+*/
+
+-- 4. Total number of books sold per order
+SELECT O.order_id, SUM(OI.quantity) AS total_books
+FROM Orders O
+JOIN OrderItems OI ON O.order_id = OI.order_id
+GROUP BY O.order_id;
+/*
++----------+--------------+
+| order_id | total_books |
++----------+--------------+
+|    1     |      2       |
+|    2     |      2       |
++----------+--------------+
+*/
+
+-- 5. Total revenue generated from each order
+SELECT O.order_id, SUM(OI.price * OI.quantity) AS order_total
+FROM Orders O
+JOIN OrderItems OI ON O.order_id = OI.order_id
+GROUP BY O.order_id;
+/*
++----------+--------------+
+| order_id | order_total  |
++----------+--------------+
+|    1     |    499.49    |
+|    2     |    998.00    |
++----------+--------------+
+*/
+
+-- 6. Average payment amount per method
+SELECT method, ROUND(AVG(amount), 2) AS avg_payment
+FROM Payments
+GROUP BY method;
+/*
++-------------+--------------+
+| method      | avg_payment  |
++-------------+--------------+
+| Credit Card |   499.49     |
+| NULL        |   998.00     |
++-------------+--------------+
+*/
+
+-- 7. Count number of books per category
+SELECT C.name AS category, COUNT(BC.book_id) AS book_count
+FROM Categories C
+JOIN BookCategories BC ON C.category_id = BC.category_id
+GROUP BY C.name;
+/*
++-------------+-------------+
+| category    | book_count |
++-------------+-------------+
+| Fiction     |     2      |
+| Fantasy     |     1      |
+| Thriller    |     2      |
+| Biography   |     0      |
++-------------+-------------+
+*/
+
+-- 8. Show authors having more than 1 book
+SELECT A.name, COUNT(B.book_id) AS book_count
+FROM Authors A
+JOIN Books B ON A.author_id = B.author_id
+GROUP BY A.name
+HAVING COUNT(B.book_id) > 1;
+/*
++---------------+-------------+
+| name          | book_count |
++---------------+-------------+
+| George Orwell |     3      |
++---------------+-------------+
+*/
+
+-- 9. Show total stock of books by author
+SELECT A.name AS author, SUM(B.stock) AS total_stock
+FROM Authors A
+JOIN Books B ON A.author_id = B.author_id
+GROUP BY A.name;
+/*
++---------------+--------------+
+| author        | total_stock |
++---------------+--------------+
+| George Orwell |     35      |
+| J.K. Rowling  |      8      |
+| Anonymous     |      5      |
++---------------+--------------+
+*/
+
+-- 10. Show total payment collected (excluding NULL)
+SELECT SUM(amount) AS total_collected FROM Payments
+WHERE amount IS NOT NULL;
+/*
++-----------------+
+| total_collected |
++-----------------+
+|     1497.49     |
++-----------------+
+*/
